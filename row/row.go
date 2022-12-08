@@ -12,7 +12,7 @@ type Row struct {
 	buf      []byte
 }
 
-func NewRow(typeList []int) *Row {
+func NewRow(typeList ...int) *Row {
 	return &Row{
 		typeList: typeList,
 	}
@@ -66,8 +66,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 		}
 		switch r.typeList[i] {
 		case column.Bool:
-			v, err := t.ReadBool()
-			if err != nil {
+			v, e := t.ReadBool()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -77,8 +78,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Int64:
-			v, err := t.ReadInt64()
-			if err != nil {
+			v, e := t.ReadInt64()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -88,8 +90,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Int32:
-			v, err := t.ReadInt32()
-			if err != nil {
+			v, e := t.ReadInt32()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -99,8 +102,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Int16:
-			v, err := t.ReadInt16()
-			if err != nil {
+			v, e := t.ReadInt16()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -110,8 +114,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Int8:
-			v, err := t.ReadInt8()
-			if err != nil {
+			v, e := t.ReadInt8()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -121,8 +126,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Uint64:
-			v, err := t.ReadUint64()
-			if err != nil {
+			v, e := t.ReadUint64()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -132,8 +138,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Uint32:
-			v, err := t.ReadUint32()
-			if err != nil {
+			v, e := t.ReadUint32()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -143,8 +150,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Uint16:
-			v, err := t.ReadUint16()
-			if err != nil {
+			v, e := t.ReadUint16()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -154,8 +162,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Uint8:
-			v, err := t.ReadUint8()
-			if err != nil {
+			v, e := t.ReadUint8()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -165,8 +174,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Float64:
-			v, err := t.ReadFloat64()
-			if err != nil {
+			v, e := t.ReadFloat64()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -176,8 +186,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Float32:
-			v, err := t.ReadFloat32()
-			if err != nil {
+			v, e := t.ReadFloat32()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -187,8 +198,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.String:
-			v, err := t.ReadString()
-			if err != nil {
+			v, e := t.ReadString()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -198,8 +210,9 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 			}
 			rs = p
 		case column.Bytes:
-			v, err := t.Read()
-			if err != nil {
+			v, e := t.Read()
+			if e != nil {
+				err = e
 				return
 			}
 			p, ok := any(v).(T)
@@ -216,14 +229,14 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 	return
 }
 
-func Change[T column.Changable](r *Row, i int, v T) (err error) {
+func Modify[T column.Column](r *Row, i int, v T) (rs []byte, err error) {
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
 				err = errors.New("index out of range")
 			}
 		}()
-		t := buffer.NewReadBuffer(r.buf)
+		t := buffer.NewModifyBuffer(r.buf)
 		for j := 0; j < i; j++ {
 			switch r.typeList[j] {
 			case column.Bool:
@@ -265,81 +278,129 @@ func Change[T column.Changable](r *Row, i int, v T) (err error) {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeBool(p)
+			t.ModifyBool(p)
 		case column.Int64:
 			p, ok := a.(int64)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeInt64(p)
+			t.ModifyInt64(p)
 		case column.Int32:
 			p, ok := a.(int32)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeInt32(p)
+			t.ModifyInt32(p)
 		case column.Int16:
 			p, ok := a.(int16)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeInt16(p)
+			t.ModifyInt16(p)
 		case column.Int8:
 			p, ok := a.(int8)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeInt8(p)
+			t.ModifyInt8(p)
 		case column.Uint64:
 			p, ok := a.(uint64)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeUint64(p)
+			t.ModifyUint64(p)
 		case column.Uint32:
 			p, ok := a.(uint32)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeUint32(p)
+			t.ModifyUint32(p)
 		case column.Uint16:
 			p, ok := a.(uint16)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeUint16(p)
+			t.ModifyUint16(p)
 		case column.Uint8:
 			p, ok := a.(uint8)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeUint8(p)
+			t.ModifyUint8(p)
 		case column.Float64:
 			p, ok := a.(float64)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeFloat64(p)
+			t.ModifyFloat64(p)
 		case column.Float32:
 			p, ok := a.(float32)
 			if !ok {
 				err = errors.New("type error")
 				return
 			}
-			t.ChangeFloat32(p)
+			t.ModifyFloat32(p)
+		case column.String:
+			p, ok := a.(string)
+			if !ok {
+				err = errors.New("type error")
+				return
+			}
+			t.ModifyString(p)
+		case column.Bytes:
+			p, ok := a.([]byte)
+			if !ok {
+				err = errors.New("type error")
+				return
+			}
+			t.Modify(p)
 		default:
 			err = errors.New("unknown type")
 			return
 		}
+		for j := i + 1; j < len(r.typeList); j++ {
+			switch r.typeList[j] {
+			case column.Bool:
+				t.SkipBool()
+			case column.Int64:
+				t.SkipInt64()
+			case column.Int32:
+				t.SkipInt32()
+			case column.Int16:
+				t.SkipInt16()
+			case column.Int8:
+				t.SkipInt8()
+			case column.Uint64:
+				t.SkipUint64()
+			case column.Uint32:
+				t.SkipUint32()
+			case column.Uint16:
+				t.SkipUint16()
+			case column.Uint8:
+				t.SkipUint8()
+			case column.Float64:
+				t.SkipFloat64()
+			case column.Float32:
+				t.SkipFloat32()
+			case column.String:
+				t.SkipString()
+			case column.Bytes:
+				t.SkipBytes()
+			default:
+				err = errors.New("unknown type")
+				return
+			}
+		}
+		rs = t.Result()
 	}()
 	return
 }
