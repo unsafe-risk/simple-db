@@ -10,14 +10,18 @@ import (
 
 func main() {
 	wb := buffer.NewWriteBuffer()
-	wb.Write([]byte{})
-	wb.WriteString("")
-	wb.WriteFloat64(3.141592)
-	wb.WriteBool(true)
-	wb.WriteInt64(1234567890)
+	wb.WriteString("John")
+	wb.WriteInt8(20)
+	wb.WriteInt8(120)
 
-	r := row.NewRow([]int{column.Bytes, column.String, column.Float64, column.Bool, column.Int64})
+	r := row.NewRow(column.String, column.Int8, column.Int8)
 	r.SetBytes(wb.Bytes())
-	row.Change[int64](r, 4, 9876543210)
-	fmt.Println(row.Get[int64](r, 4))
+	bs, err := row.Modify(r, 0, "merak")
+	if err != nil {
+		panic(err)
+	}
+	r.SetBytes(bs)
+	fmt.Println(row.Get[string](r, 0))
+	fmt.Println(row.Get[int8](r, 1))
+	fmt.Println(row.Get[int8](r, 2))
 }
