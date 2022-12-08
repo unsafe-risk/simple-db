@@ -37,24 +37,24 @@ func (b *ReadBuffer) SkipFloat64() {
 	b.buf = b.buf[8:]
 }
 
-func (b *ReadBuffer) ChangeFloat32(v float32) {
-	l := [4]byte{}
-	binary.BigEndian.PutUint32(l[:], math.Float32bits(v))
-	b.buf[0] = l[0]
-	b.buf[1] = l[1]
-	b.buf[2] = l[2]
-	b.buf[3] = l[3]
+func (b *ModifyBuffer) SkipFloat32() {
+	b.result.Write(b.buf[:4])
+	b.buf = b.buf[4:]
 }
 
-func (b *ReadBuffer) ChangeFloat64(v float64) {
+func (b *ModifyBuffer) SkipFloat64() {
+	b.result.Write(b.buf[:8])
+	b.buf = b.buf[8:]
+}
+
+func (b *ModifyBuffer) ModifyFloat32(f float32) {
+	l := [4]byte{}
+	binary.BigEndian.PutUint32(l[:], math.Float32bits(f))
+	b.result.Write(l[:])
+}
+
+func (b *ModifyBuffer) ModifyFloat64(f float64) {
 	l := [8]byte{}
-	binary.BigEndian.PutUint64(l[:], math.Float64bits(v))
-	b.buf[0] = l[0]
-	b.buf[1] = l[1]
-	b.buf[2] = l[2]
-	b.buf[3] = l[3]
-	b.buf[4] = l[4]
-	b.buf[5] = l[5]
-	b.buf[6] = l[6]
-	b.buf[7] = l[7]
+	binary.BigEndian.PutUint64(l[:], math.Float64bits(f))
+	b.result.Write(l[:])
 }

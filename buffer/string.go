@@ -21,3 +21,19 @@ func (b *ReadBuffer) SkipString() {
 	l := binary.BigEndian.Uint32(b.buf[:4])
 	b.buf = b.buf[4+int(l):]
 }
+
+func (b *ModifyBuffer) SkipString() {
+	b.result.Write(b.buf[:4])
+	l := binary.BigEndian.Uint32(b.buf[:4])
+	b.result.Write(b.buf[4 : 4+l])
+	b.buf = b.buf[4+int(l):]
+}
+
+func (b *ModifyBuffer) ModifyString(s string) {
+	u := binary.BigEndian.Uint32(b.buf[:4])
+	b.buf = b.buf[4+int(u):]
+	l := [4]byte{}
+	binary.BigEndian.PutUint32(l[:], uint32(len(s)))
+	b.result.Write(l[:])
+	b.result.WriteString(s)
+}

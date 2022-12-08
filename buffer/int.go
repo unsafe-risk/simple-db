@@ -128,34 +128,94 @@ func (b *ReadBuffer) SkipUint64() {
 	b.buf = b.buf[8:]
 }
 
-func (b *ReadBuffer) ChangeInt8(v int8) {
-	b.buf[0] = byte(v)
+func (b *ModifyBuffer) SkipInt8() {
+	b.result.WriteByte(b.buf[0])
+	b.buf = b.buf[1:]
 }
 
-func (b *ReadBuffer) ChangeInt16(v int16) {
-	binary.BigEndian.PutUint16(b.buf[:2], uint16(v))
+func (b *ModifyBuffer) SkipInt16() {
+	b.result.Write(b.buf[:2])
+	b.buf = b.buf[2:]
 }
 
-func (b *ReadBuffer) ChangeInt32(v int32) {
-	binary.BigEndian.PutUint32(b.buf[:4], uint32(v))
+func (b *ModifyBuffer) SkipInt32() {
+	b.result.Write(b.buf[:4])
+	b.buf = b.buf[4:]
 }
 
-func (b *ReadBuffer) ChangeInt64(v int64) {
-	binary.BigEndian.PutUint64(b.buf[:8], uint64(v))
+func (b *ModifyBuffer) SkipInt64() {
+	b.result.Write(b.buf[:8])
+	b.buf = b.buf[8:]
 }
 
-func (b *ReadBuffer) ChangeUint8(v uint8) {
-	b.buf[0] = v
+func (b *ModifyBuffer) SkipUint8() {
+	b.result.WriteByte(b.buf[0])
+	b.buf = b.buf[1:]
 }
 
-func (b *ReadBuffer) ChangeUint16(v uint16) {
-	binary.BigEndian.PutUint16(b.buf[:2], v)
+func (b *ModifyBuffer) SkipUint16() {
+	b.result.Write(b.buf[:2])
+	b.buf = b.buf[2:]
 }
 
-func (b *ReadBuffer) ChangeUint32(v uint32) {
-	binary.BigEndian.PutUint32(b.buf[:4], v)
+func (b *ModifyBuffer) SkipUint32() {
+	b.result.Write(b.buf[:4])
+	b.buf = b.buf[4:]
 }
 
-func (b *ReadBuffer) ChangeUint64(v uint64) {
-	binary.BigEndian.PutUint64(b.buf[:8], v)
+func (b *ModifyBuffer) SkipUint64() {
+	b.result.Write(b.buf[:8])
+	b.buf = b.buf[8:]
+}
+
+func (b *ModifyBuffer) ModifyInt8(i int8) {
+	b.result.WriteByte(byte(i))
+	b.buf = b.buf[1:]
+}
+
+func (b *ModifyBuffer) ModifyInt16(i int16) {
+	l := [2]byte{}
+	binary.BigEndian.PutUint16(l[:], uint16(i))
+	b.result.Write(l[:])
+	b.buf = b.buf[2:]
+}
+
+func (b *ModifyBuffer) ModifyInt32(i int32) {
+	l := [4]byte{}
+	binary.BigEndian.PutUint32(l[:], uint32(i))
+	b.result.Write(l[:])
+	b.buf = b.buf[4:]
+}
+
+func (b *ModifyBuffer) ModifyInt64(i int64) {
+	l := [8]byte{}
+	binary.BigEndian.PutUint64(l[:], uint64(i))
+	b.result.Write(l[:])
+	b.buf = b.buf[8:]
+}
+
+func (b *ModifyBuffer) ModifyUint8(i uint8) {
+	b.result.WriteByte(i)
+	b.buf = b.buf[1:]
+}
+
+func (b *ModifyBuffer) ModifyUint16(i uint16) {
+	l := [2]byte{}
+	binary.BigEndian.PutUint16(l[:], i)
+	b.result.Write(l[:])
+	b.buf = b.buf[2:]
+}
+
+func (b *ModifyBuffer) ModifyUint32(i uint32) {
+	l := [4]byte{}
+	binary.BigEndian.PutUint32(l[:], i)
+	b.result.Write(l[:])
+	b.buf = b.buf[4:]
+}
+
+func (b *ModifyBuffer) ModifyUint64(i uint64) {
+	l := [8]byte{}
+	binary.BigEndian.PutUint64(l[:], i)
+	b.result.Write(l[:])
+	b.buf = b.buf[8:]
 }

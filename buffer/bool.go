@@ -18,7 +18,13 @@ func (b *ReadBuffer) SkipBool() {
 	b.buf = b.buf[1:]
 }
 
-func (b *ReadBuffer) ChangeBool(v bool) {
+func (b *ModifyBuffer) SkipBool() {
+	b.result.WriteByte(b.buf[0])
+	b.buf = b.buf[1:]
+}
+
+func (b *ModifyBuffer) ModifyBool(v bool) {
+	b.result.Write(b.buf[:1])
 	if v {
 		b.buf[0] = 1
 	} else {
