@@ -30,10 +30,10 @@ func (t *Table) SetColumns(c ...int) {
 	t.columns = c
 }
 
-func (t *Table) GetRow(key []byte) (*row.Row, error) {
+func (t *Table) GetRow(key string) (*row.Row, error) {
 	r := row.New(t.columns...)
 	if err := t.conn.View(func(txn *badger.Txn) error {
-		item, err := txn.Get(key)
+		item, err := txn.Get([]byte(key))
 		if err != nil {
 			return err
 		}
@@ -53,21 +53,21 @@ func (t *Table) GetBlankRow() (*row.Row, error) {
 	return row.NewBlank(t.columns...)
 }
 
-func (t *Table) SetRow(key []byte, r *row.Row) error {
+func (t *Table) SetRow(key string, r *row.Row) error {
 	if !r.EqualColumnTypes(t.columns...) {
 		return errors.New("column type mismatch")
 	}
 	if err := t.conn.Update(func(txn *badger.Txn) error {
-		return txn.Set(key, r.GetBytes())
+		return txn.Set([]byte(key), r.GetBytes())
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (t *Table) DeleteRow(key []byte) error {
+func (t *Table) DeleteRow(key string) error {
 	if err := t.conn.Update(func(txn *badger.Txn) error {
-		return txn.Delete(key)
+		return txn.Delete([]byte(key))
 	}); err != nil {
 		return err
 	}
