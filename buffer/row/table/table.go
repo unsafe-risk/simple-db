@@ -2,17 +2,18 @@ package table
 
 import (
 	"errors"
+	"github.com/unsafe-risk/simple-db/buffer/row"
 
 	"github.com/cornelk/hashmap"
 	"github.com/dgraph-io/badger/v3"
-	"github.com/unsafe-risk/simple-db/row"
 )
 
 type Table struct {
 	conn   *badger.DB
 	locker *hashmap.Map[string, struct{}]
 
-	columns []int
+	columns        []int
+	columnIndexMap *hashmap.Map[string, int]
 }
 
 func New(path string) (*Table, error) {
@@ -26,8 +27,16 @@ func New(path string) (*Table, error) {
 	}, nil
 }
 
-func (t *Table) SetColumns(c ...int) {
+func (t *Table) SetColumns(n []string, c []int) bool {
+	if len(n) != len(c) {
+		return false
+	}
 	t.columns = c
+	t.columnIndexMap = hashmap.New[string, int]()
+	for i := range n {
+		t.columnIndexMap.Set(n[i], i)
+	}
+	return true
 }
 
 func (t *Table) GetRow(key string) (*row.Row, error) {
@@ -83,6 +92,16 @@ func (t *Table) Lock(key string) bool {
 
 func (t *Table) Unlock(key string) bool {
 	return t.locker.Del(key)
+}
+
+func (t *Table) GetColumnIndex(col string) int {
+	if t.columnIndexMap == nil {
+		return -1
+	}
+	if index, exist := t.columnIndexMap.Get(col); exist {
+		return index
+	}
+	return -1
 }
 
 func (t *Table) Close() error {

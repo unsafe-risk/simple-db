@@ -2,9 +2,8 @@ package row
 
 import (
 	"errors"
-
 	"github.com/unsafe-risk/simple-db/buffer"
-	"github.com/unsafe-risk/simple-db/row/column"
+	"github.com/unsafe-risk/simple-db/buffer/column"
 )
 
 type Row struct {
