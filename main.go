@@ -30,11 +30,11 @@ func main() {
 	row.Modify(r, 0, "John Doe")
 	row.Modify(r, 1, int8(42))
 
-	if err := persons.SetRow([]byte("1"), r); err != nil {
+	if err := persons.SetRow("1", r); err != nil {
 		panic(err)
 	}
 
-	r, err = persons.GetRow([]byte("1"))
+	r, err = persons.GetRow("1")
 	if err != nil {
 		panic(err)
 	}
@@ -51,7 +51,7 @@ func main() {
 
 	fmt.Println(name, age)
 
-	if err := persons.DeleteRow([]byte("1")); err != nil {
+	if err := persons.DeleteRow("1"); err != nil {
 		panic(err)
 	}
 
