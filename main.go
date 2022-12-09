@@ -16,11 +16,15 @@ func main() {
 
 	r := row.NewRow(column.String, column.Int8, column.Int8)
 	r.SetBytes(wb.Bytes())
-	bs, err := row.Modify(r, 0, "merak")
-	if err != nil {
+	if err := row.Modify(r, 0, "merak"); err != nil {
 		panic(err)
 	}
-	r.SetBytes(bs)
+	if err := row.Modify[int8](r, 1, 27); err != nil {
+		panic(err)
+	}
+	if err := row.Modify[int8](r, 2, 100); err != nil {
+		panic(err)
+	}
 	fmt.Println(row.Get[string](r, 0))
 	fmt.Println(row.Get[int8](r, 1))
 	fmt.Println(row.Get[int8](r, 2))
