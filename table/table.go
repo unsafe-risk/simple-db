@@ -64,3 +64,16 @@ func (t *Table) SetRow(key []byte, r *row.Row) error {
 	}
 	return nil
 }
+
+func (t *Table) DeleteRow(key []byte) error {
+	if err := t.conn.Update(func(txn *badger.Txn) error {
+		return txn.Delete(key)
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Table) Close() error {
+	return t.conn.Close()
+}
