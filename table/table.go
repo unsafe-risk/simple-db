@@ -2,15 +2,15 @@ package table
 
 import (
 	"errors"
-	"sync"
 
+	"github.com/cornelk/hashmap"
 	"github.com/dgraph-io/badger/v3"
 	"github.com/unsafe-risk/simple-db/row"
 )
 
 type Table struct {
 	conn   *badger.DB
-	locker sync.Map
+	locker *hashmap.Map[string, struct{}]
 
 	columns []int
 }
@@ -22,7 +22,7 @@ func New(path string) (*Table, error) {
 	}
 	return &Table{
 		conn:   db,
-		locker: sync.Map{},
+		locker: hashmap.New[string, struct{}](),
 	}, nil
 }
 
@@ -72,6 +72,17 @@ func (t *Table) DeleteRow(key []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (t *Table) Lock(key string) bool {
+	if _, exist := t.locker.GetOrInsert(key, struct{}{}); exist {
+		return false
+	}
+	return true
+}
+
+func (t *Table) Unlock(key string) bool {
+	return t.locker.Del(key)
 }
 
 func (t *Table) Close() error {
