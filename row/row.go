@@ -12,10 +12,49 @@ type Row struct {
 	buf      []byte
 }
 
-func NewRow(typeList ...int) *Row {
+func New(typeList ...int) *Row {
 	return &Row{
 		typeList: typeList,
 	}
+}
+
+func NewBlank(typeList ...int) (*Row, error) {
+	r := New(typeList...)
+	wr := buffer.NewWriteBuffer()
+	for _, t := range typeList {
+		switch t {
+		case column.Bool:
+			wr.WriteBool(false)
+		case column.Int64:
+			wr.WriteInt64(0)
+		case column.Int32:
+			wr.WriteInt32(0)
+		case column.Int16:
+			wr.WriteInt16(0)
+		case column.Int8:
+			wr.WriteInt8(0)
+		case column.Uint64:
+			wr.WriteUint64(0)
+		case column.Uint32:
+			wr.WriteUint32(0)
+		case column.Uint16:
+			wr.WriteUint16(0)
+		case column.Uint8:
+			wr.WriteUint8(0)
+		case column.Float64:
+			wr.WriteFloat64(0)
+		case column.Float32:
+			wr.WriteFloat32(0)
+		case column.String:
+			wr.WriteString("")
+		case column.Bytes:
+			wr.Write([]byte{})
+		default:
+			return nil, errors.New("unknown column type")
+		}
+	}
+	r.buf = wr.Bytes()
+	return r, nil
 }
 
 func (r *Row) SetBytes(v []byte) error {
@@ -403,4 +442,22 @@ func Modify[T column.Column](r *Row, i int, v T) (err error) {
 		r.buf = t.Result()
 	}()
 	return
+}
+
+func (r *Row) GetBytes() []byte {
+	p := make([]byte, len(r.buf))
+	copy(p, r.buf)
+	return p
+}
+
+func (r *Row) EqualColumnTypes(t ...int) bool {
+	if len(t) != len(r.typeList) {
+		return false
+	}
+	for i := range t {
+		if t[i] != r.typeList[i] {
+			return false
+		}
+	}
+	return true
 }
