@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 
 	"github.com/unsafe-risk/simple-db/row"
 	"github.com/unsafe-risk/simple-db/row/column"
@@ -15,6 +17,10 @@ func main() {
 	}
 
 	persons.SetColumns(column.String, column.Int8)
+
+	if ok := persons.Lock("1"); !ok {
+		panic("lock failed")
+	}
 
 	r, err := persons.GetBlankRow()
 	if err != nil {
@@ -49,7 +55,15 @@ func main() {
 		panic(err)
 	}
 
+	if ok := persons.Unlock("1"); !ok {
+		panic("unlock failed")
+	}
+
 	if err := persons.Close(); err != nil {
 		panic(err)
 	}
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	<-sig
 }
