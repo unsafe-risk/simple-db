@@ -229,7 +229,7 @@ func Get[T column.Column](r *Row, i int) (rs T, err error) {
 	return
 }
 
-func Modify[T column.Column](r *Row, i int, v T) (rs []byte, err error) {
+func Modify[T column.Column](r *Row, i int, v T) (err error) {
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -400,7 +400,7 @@ func Modify[T column.Column](r *Row, i int, v T) (rs []byte, err error) {
 				return
 			}
 		}
-		rs = t.Result()
+		r.buf = t.Result()
 	}()
 	return
 }
