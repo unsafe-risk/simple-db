@@ -39,6 +39,14 @@ func (t *Table) SetColumns(n []string, c []int) bool {
 	return true
 }
 
+func (t *Table) GetColumnType(name string) int {
+	v, ok := t.columnIndexMap.Get(name)
+	if !ok {
+		return -1
+	}
+	return t.columns[v]
+}
+
 func (t *Table) GetRow(key string) (*row.Row, error) {
 	r := row.New(t.columns...)
 	if err := t.conn.View(func(txn *badger.Txn) error {
