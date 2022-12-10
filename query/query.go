@@ -9,7 +9,8 @@ const (
 )
 
 type Query struct {
-	Type  int
-	Key   string
-	Value []byte
+	Type   int
+	Key    string
+	Column string
+	Value  []byte
 }
